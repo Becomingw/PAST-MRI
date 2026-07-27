@@ -1,0 +1,135 @@
+experiment_name: past_mri_stage2_true5x5_balanced_w128
+contrast: all
+stack_depth: 5
+patch_size: 256
+batch_size: 16
+num_workers: 4
+persistent_workers: true
+amp: true
+seed: 20260820
+
+slab:
+  z_start: 56
+  z_end: 281
+
+base_calibration:
+  method: source-copy
+  methods_by_contrast:
+    T1W: robust-zscore_b075
+    T2FLAIR: robust-zscore_b010
+    T2W: source-copy
+  target_stats_path: ${PAST_MRI_DATA_ROOT}/target_stats.json
+
+model:
+  name: CondNAFUNet5x5
+  in_channels: 5
+  output_channels: 5
+  width: 128
+  enc_blocks: [2, 2, 4]
+  mid_blocks: 8
+  dec_blocks: [2, 2, 2]
+  cond_dim: 256
+  source_stats_mode: masked_basic13
+  output_mode: anchor_unbounded_residual
+  alpha_max: 1.0
+  use_hyper_residual_head: true
+  hyper_residual_mode: full_kernel_delta
+  hyper_residual_hidden: 384
+  hyper_residual_scale: 0.035
+  use_hyper_trunk: false
+  use_calibration_head: true
+  calibration_head: target_stat_gain_bias_lowres_delta_v1
+  target_stats_path: ${PAST_MRI_DATA_ROOT}/target_stats.json
+  calibration_lowfreq_kernel_size: 5
+  calibration_blend_max: 1.0
+  calibration_texture_blend_max: 1.0
+  calibration_gain_scale_max: 0.55
+  calibration_bias_scale_max: 0.14
+  calibration_relation_map_init_logit: -0.84729786039
+  calibration_relation_lowfreq_init_logit: -4.0
+  calibration_relation_source_floor_init_logit: -3.0
+  calibration_source_gate_mode: source_edge_v1
+  calibration_source_gate_floor: 0.5
+  calibration_source_gate_strength: 1.0
+  policy_feature_dim: 0
+  use_tissue_head: false
+  method_bank_size: 0
+  executor_family_size: 0
+  executor_param_dim: 0
+  lowres_field_downsample: 8
+  lowres_field_mode: gain_bias
+
+inference:
+  output_fusion: uniform
+
+training: {}
+
+optim:
+  name: AdamW
+  lr: 0.00008
+  weight_decay: 0.0001
+  betas: [0.9, 0.99]
+  scheduler: cosine_floor
+  min_lr_ratio: 0.35
+  lr_no_early_decay: true
+  warmup_steps: 1200
+  total_steps: 40000
+
+early_stop:
+  enabled: false
+
+loss:
+  charbonnier: 0.18
+  msssim: 0.36
+  lpips: 0.015
+  gradient: 0.045
+  laplacian: 0.01
+  masked_nrmse: 0.52
+  percentile: 0.12
+  calibration_lowfreq: 0.85
+  calibration_lowfreq_kernel_size: 17
+  residual_reg: 0.025
+  source_highfreq_hinge: 0.12
+  source_highfreq_kernel_size: 9
+  source_highfreq_margin: 0.0
+  residual_reg_multipliers:
+    T1W: 1.0
+    T2FLAIR: 1.1
+    T2W: 1.2
+  calibration_lowfreq_multipliers:
+    T1W: 1.0
+    T2FLAIR: 1.15
+    T2W: 1.25
+  target_field_multipliers:
+    masked_nrmse:
+      0.1T: 1.3
+      7T: 1.7
+    calibration_lowfreq:
+      0.1T: 1.25
+      7T: 1.7
+    percentile:
+      7T: 1.35
+    source_highfreq_hinge:
+      0.1T: 1.5
+    residual_reg:
+      0.1T: 1.25
+
+ema:
+  enabled: true
+  decay: 0.9999
+  start_step: 0
+
+sampling:
+  identity_prob: 0.03
+  pair_balanced: true
+  cache_size: 96
+  load_method_bank_candidates: false
+
+logging:
+  log_interval: 50
+  val_interval: 1000
+  save_interval: 10000
+
+pretraining:
+  transfer_mode: encoder_middle_core
+  initializer: outputs/stage1/terminal_encoder_middle_core_initializer.ckpt

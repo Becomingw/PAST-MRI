@@ -1,0 +1,98 @@
+experiment_name: past_mri_stage1_mdae2p5d_w128
+purpose: contrast-agnostic masked-denoising pretraining on unpaired MRI
+method_label: MDAE-inspired 2.5D; not an exact reproduction of the original 3D method
+seed: 20260718
+deterministic: false
+stack_depth: 5
+patch_size: 256
+batch_size: 4
+num_workers: 4
+amp: true
+
+data:
+  slab_root: ${PAST_MRI_DATA_ROOT}/unpaired_slabs
+  train_manifest: ${PAST_MRI_DATA_ROOT}/manifests/stage1_train.jsonl
+  val_manifest: ${PAST_MRI_DATA_ROOT}/manifests/stage1_val.jsonl
+  cache_size: 16
+  val_samples_per_bucket: 8
+  val_batch_size: 4
+  foreground_threshold: 0.01
+  minimum_foreground_fraction: 0.03
+  crop_attempts: 8
+
+mask:
+  distribution: uniform
+  ratio_min: 0.01
+  ratio_max: 0.99
+  block_sizes: [16]
+  fill_value: 0.0
+  foreground_attempts: 32
+  minimum_foreground_pixels_per_region: 64
+  shared_across_all_slices: true
+
+noise:
+  schedule: ve_linear
+  t_min: 0.0
+  t_max: 1.0
+  scale_mode: foreground_robust_std
+  sigma_max_multiplier: 1.0
+  sigma_data_min: 0.05
+  sigma_data_max: 0.30
+  independent_per_slice: true
+  clip_noisy_input: false
+
+model:
+  name: CondNAFUNet
+  block_family: naf
+  in_channels: 5
+  width: 128
+  enc_blocks: [2, 2, 4]
+  mid_blocks: 8
+  dec_blocks: [2, 2, 2]
+  cond_dim: 256
+  time_embedding_dim: 256
+  output_mode: direct_output
+  use_calibration_head: false
+  use_hyper_residual_head: false
+  use_hyper_trunk: false
+  use_tissue_head: false
+  method_bank_size: 0
+  executor_family_size: 0
+  executor_param_dim: 0
+
+loss:
+  target: clean_center_slice_x0
+  foreground_only: true
+  masked_weight: 1.0
+  visible_weight: 1.0
+  visible_weighting: bounded_inverse_variance
+
+optim:
+  name: AdamW
+  lr: 0.0001
+  betas: [0.9, 0.999]
+  weight_decay: 0.0001
+  scheduler: cosine_floor
+  min_lr_ratio: 0.10
+  warmup_steps: 1000
+  total_steps: 40000
+  grad_clip_norm: 1.0
+
+logging:
+  log_interval: 50
+  val_interval: 2000
+  save_interval: 5000
+  max_consecutive_amp_overflows: 8
+  keep_periodic: true
+  save_validation_panels: true
+
+transfer:
+  selection: terminal_step
+  primary_mode: encoder_middle_core
+  diagnostic_mode: full_core
+  excluded_parameters:
+    - field_embed
+    - contrast_embed
+    - condition_mlp
+    - all FiLM projections
+    - reconstruction_head
