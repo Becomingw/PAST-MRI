@@ -3,6 +3,11 @@
 **P**retraining on unpaired **A**natomy followed by paired **S**upervised
 **T**ranslation for multi-field MRI.
 
+Official implementation of **Rethinking Unpaired Data in Unified Cross-Field MRI Synthesis**,
+published in the MRIxFields2026 challenge proceedings at MICCAI 2026.
+
+[Paper (MICCAI Open Access)](https://papers.miccai.org/miccai-2026-sat/MRIxFields2026_005.html) · [PDF](https://papers.miccai.org/miccai-2026-sat/paper/MRIxFields2026_005.pdf) · [BibTeX](#citation)
+
 PAST-MRI learns shared anatomical representations from abundant unpaired MRI
 and then adapts a single condition-controlled model using scarce paired
 multi-field scans. The repository contains only the final PAST-MRI workflow:
@@ -174,5 +179,19 @@ MIT. See `LICENSE`.
 
 ## Citation
 
-Please cite the accompanying PAST-MRI paper and the MRIxFields benchmark when
-using this code. A final BibTeX entry will be added after publication.
+Please cite the PAST-MRI paper and the MRIxFields benchmark when using this code.
+
+```bibtex
+@inproceedings{WanMen_Rethinking_MICCAISAT2026,
+  author    = {Wang, Mengfei and Li, Yunyi and Zeng, Yao and Li, Zhuo and
+               Tu, Yifan and Tang, Yixiao and Cao, Zhongzheng and Zheng, Wenhua and
+               Li, Yuehua and Zhang, Ruipeng},
+  title     = {Rethinking Unpaired Data in Unified Cross-Field {MRI} Synthesis},
+  booktitle = {Medical Image Computing and Computer Assisted Intervention -- MICCAI 2026 Workshops and Challenges},
+  series    = {Lecture Notes in Computer Science},
+  volume    = {17274},
+  year      = {2026},
+  publisher = {Springer Nature Switzerland},
+  url       = {https://papers.miccai.org/miccai-2026-sat/MRIxFields2026_005.html}
+}
+```

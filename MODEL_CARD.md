@@ -22,12 +22,16 @@ masked-diffusion implementation.
 
 ## Observed External Performance
 
-On the held-out 15-subject, 180-volume evaluation used in the accompanying
-study:
+The table reports Task 3 results for unified translation across all 20 directed
+field pairs on the held-out evaluation set (15 subjects, 180 volumes).
 
 | SSIM | nRMSE | LPIPS |
 |---:|---:|---:|
 | 0.915138 | 0.222335 | 0.097913 |
+
+On the same cohort, the same checkpoint achieved SSIM of 0.9171 for synthesis
+to 7 T (Task 1) and 0.8973 for enhancement from 0.1 T (Task 2).
+[Paper and evaluation details](https://papers.miccai.org/miccai-2026-sat/MRIxFields2026_005.html)
 
 These aggregate values do not imply uniform superiority for every contrast or
 field direction.
