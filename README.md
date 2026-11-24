@@ -1,21 +1,28 @@
-# PAST-MRI
+<h1 align="center">PAST-MRI</h1>
+<p align="center">
+  <strong>Rethinking Unpaired Data in Unified Cross-Field MRI Synthesis</strong><br>
+  MICCAI 2026 · MRIxFields Challenge
+</p>
+<p align="center">
+  <a href="https://papers.miccai.org/miccai-2026-sat/MRIxFields2026_005.html">Paper</a> ·
+  <a href="https://papers.miccai.org/miccai-2026-sat/paper/MRIxFields2026_005.pdf">PDF</a> ·
+  <a href="#validation-results">Results</a> ·
+  <a href="#installation">Installation</a> ·
+  <a href="#end-to-end-run">Run the pipeline</a> ·
+  <a href="#citation">BibTeX</a>
+</p>
 
-**P**retraining on unpaired **A**natomy followed by paired **S**upervised
-**T**ranslation for multi-field MRI.
-
-Official implementation of **Rethinking Unpaired Data in Unified Cross-Field MRI Synthesis**,
-published in the MRIxFields2026 challenge proceedings at MICCAI 2026.
-
-[Paper (MICCAI Open Access)](https://papers.miccai.org/miccai-2026-sat/MRIxFields2026_005.html) · [PDF](https://papers.miccai.org/miccai-2026-sat/paper/MRIxFields2026_005.pdf) · [BibTeX](#citation)
-
-PAST-MRI learns shared anatomical representations from abundant unpaired MRI
-and then adapts a single condition-controlled model using scarce paired
-multi-field scans. The repository contains only the final PAST-MRI workflow:
-data preparation, Stage 1 masked-denoising pretraining, Stage 2 paired
-translation, strict checkpoint continuation, inference, and submission
-packaging.
+> **Task 1 · Tied 10th of 24 teams** in the MRIxFields2026 challenge for
+> synthesis to 7 T. [Official final ranking](https://www.synapse.org/Synapse:syn72060672/wiki/643814)
 
 ## Method
+
+PAST-MRI (**P**retraining on unpaired **A**natomy followed by paired **S**upervised
+**T**ranslation) first learns anatomy from 1,939 unpaired MRI volumes. Scans from
+three volunteers imaged at all five field strengths then teach the same model to
+translate across all 20 directed field pairs.
+
+![PAST-MRI method diagram from Figure 1 of the paper. Masked-denoising pretraining on unpaired scans initializes a conditional U-Net for paired cross-field translation.](docs/images/past-mri-overview.png)
 
 1. **Unpaired anatomical pretraining.** Five adjacent slices receive
    independent Gaussian noise and a shared 16-by-16 block mask. A conditional
@@ -32,7 +39,21 @@ packaging.
 The Stage 1 objective is MDAE-inspired but is a task-specific 2.5D adaptation,
 not an exact implementation of the original 3D method.
 
-## Repository Layout
+## Validation results
+
+Table 2 of the paper reports external validation on 15 subjects using one
+checkpoint across all three tasks.
+
+| Task | Translation | SSIM ↑ | nRMSE ↓ | LPIPS ↓ |
+|:---|:---|---:|---:|---:|
+| 1 | Synthesis to 7 T | 0.9171 | 0.2858 | 0.0920 |
+| 2 | Enhancement from 0.1 T | 0.8973 | 0.1941 | 0.1300 |
+| 3 | All 20 directed field pairs | 0.9151 | 0.2223 | 0.0979 |
+
+[Model card](MODEL_CARD.md) · [Full evaluation in the paper](https://papers.miccai.org/miccai-2026-sat/paper/MRIxFields2026_005.pdf)
+
+<details>
+<summary><strong>Repository layout and release manifest</strong></summary>
 
 ```text
 configs/                  final Stage 1 and Stage 2 recipes
@@ -51,6 +72,8 @@ tests/                    focused regression tests
 
 The exact release compatibility checks and source hashes are recorded in
 [`RELEASE_MANIFEST.md`](RELEASE_MANIFEST.md).
+
+</details>
 
 ## Installation
 
